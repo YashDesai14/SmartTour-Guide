@@ -1,0 +1,5 @@
+{
+    "require": {
+        "joshtronic/php-googleplaces": "dev-master"
+    }
+}

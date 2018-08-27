@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html>
+<title>MOOD</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="index.css">
+<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <script type="text/javascript" src="weather.js"></script>
+  <style>
+.navbar{
+margin:0px;
+}
+
+.container{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.container{
+margin: 4% auto;
+}
+#icon {
+max-width: 200px;
+margin: 5% auto;
+
+}
+.wetbtn{
+height:100px;
+
+
+#myMap {
+   height: 350px;
+   width: 680px;
+}
+
+
+</style>
+<body>
+
+<nav class="navbar navbar-inverse">
+  <div class="container-fluid">
+    <div class="navbar-header">
+	  <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+	  <span class="icon-bar"></span>
+	  <span class="icon-bar"></span>
+	  <span class="icon-bar"></span>
+	  </button>
+      <a class="navbar-brand" href="#">TRAVEL</a>
+    </div>
+	<div class="collapse navbar-collapse" id="myNavbar">
+    <ul class="nav navbar-nav">
+      <li class="active"><a href="#index.html">Home</a></li>
+      <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#">Support <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+          <li><a href="#">Contact Us</a></li>
+          <li><a href="#">About Us</a></li>
+        </ul>
+      </li>
+      <li><a href="explore.html">Explore</a></li>
+    </ul>
+    <ul class="nav navbar-nav navbar-right">
+      <li><a href="register.html" ><span class="glyphicon glyphicon-user"></span> Sign Up</a></li>
+      <li><a data-toggle="modal" data-target="#login-modal">><span class="glyphicon glyphicon-log-in"></span> Login</a></li>
+    </ul>
+  </div>
+  </div>
+</nav>
+<!-- login page -->
+
+<div class="modal fade" id="login-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
+    	  <div class="modal-dialog">
+				<div class="loginmodal-container">
+					<h1>Login to Your Account</h1><br>
+				  <form>
+					<input type="text" name="user" placeholder="Username">
+					<input type="password" name="pass" placeholder="Password">
+					<input type="submit" name="login" class="login loginmodal-submit" value="Login">
+				  </form>
+					
+				  <div class="login-help">
+					<a href="register.html">Register</a> - <a href="#">Forgot Password</a>
+				  </div>
+				</div>
+			</div>
+		  </div>
+
+<div id="myMap"></div>
+
+</body>
+<script type="text/javascript">
+$(function(){
+$('.chkbox').click(function(){
+$(':checkbox').attr('checked',false);
+$('#'+$(this).attr('id')).attr('checked',true);
+search_types(map.getCenter());
+});
+
+});
+
+var map;
+var infowindow;
+var markersArray = [];
+var pyrmont = new google.maps.LatLng(20.268455824834792, 85.84099235520011);
+var marker;
+var geocoder = new google.maps.Geocoder();
+var infowindow = new google.maps.InfoWindow();
+// var waypoints = []; 
+function initialize() {
+map = new google.maps.Map(document.getElementById('map'), {
+mapTypeId: google.maps.MapTypeId.ROADMAP,
+center: pyrmont,
+zoom: 14
+});
+infowindow = new google.maps.InfoWindow();
+//document.getElementById('directionsPanel').innerHTML='';
+search_types();
+}
+
+function createMarker(place,icon) {
+var placeLoc = place.geometry.location;
+var marker = new google.maps.Marker({
+map: map,
+position: place.geometry.location,
+icon: icon,
+visible:true 
+
+});
+
+markersArray.push(marker);
+google.maps.event.addListener(marker, 'click', function() {
+infowindow.setContent("<b>Name:</b>"+place.name+"<br><b>Address:</b>"
++place.vicinity+"<br><b>Reference:</b>"+place.reference+"<br><b>Rating:</b>"
++place.rating+"<br><b>Id:</b>"+place.id);
+infowindow.open(map, this);
+});
+
+}
+var source="";
+var dest='';
+
+function search_types(latLng){
+clearOverlays(); 
+
+if(!latLng){
+var latLng = pyrmont;
+}
+var type = $('.chkbox:checked').val();
+var icon = "images/"+type+".png";
+
+
+var request = {
+location: latLng,
+radius: 20000,
+types: [type] //e.g.school,restaurant,bank etc..
+};
+
+var service = new google.maps.places.PlacesService(map);
+service.search(request, function(results, status) {
+map.setZoom(14);
+if (status == google.maps.places.PlacesServiceStatus.OK) {
+for (var i = 0; i < results.length; i++) {
+results[i].html_attributions='';
+createMarker(results[i],icon);
+}
+}
+});
+
+}
+
+
+// Deletes all markers in the array by removing references to them
+function clearOverlays() {
+if (markersArray) {
+for (i in markersArray) {
+markersArray[i].setVisible(false)
+}
+//markersArray.length = 0;
+}
+}
+google.maps.event.addDomListener(window, 'load', initialize);
+
+function clearMarkers(){
+$('#show_btn').show();
+$('#hide_btn').hide();
+clearOverlays()
+}
+function showMarkers(){
+$('#show_btn').hide();
+$('#hide_btn').show();
+if (markersArray) {
+for (i in markersArray) {
+markersArray[i].setVisible(true)
+}
+
+}
+}
+
+function showMap(){
+
+var imageUrl = 'http://chart.apis.google.com/chart?cht=mm&
+chs=24x32&chco=FFFFFF,008CFF,000000&ext=.png';
+var markerImage = new google.maps.MarkerImage(imageUrl,new google.maps.
+Size(24, 32));
+var input_addr=$('#address').val();
+geocoder.geocode({address: input_addr}, function(results, status) {
+if (status == google.maps.GeocoderStatus.OK) {
+var latitude = results[0].geometry.location.lat();
+var longitude = results[0].geometry.location.lng();
+var latlng = new google.maps.LatLng(latitude, longitude);
+if (results[0]) {
+map.setZoom(14);
+map.setCenter(latlng);
+marker = new google.maps.Marker({
+position: latlng, 
+map: map,
+icon: markerImage,
+draggable: true 
+
+}); 
+$('#btn').hide();
+$('#latitude,#longitude').show();
+$('#address').val(results[0].formatted_address);
+$('#latitude').val(marker.getPosition().lat());
+$('#longitude').val(marker.getPosition().lng());
+infowindow.setContent(results[0].formatted_address);
+infowindow.open(map, marker);
+search_types(marker.getPosition());
+google.maps.event.addListener(marker, 'click', function() {
+infowindow.open(map,marker);
+
+});
+
+
+google.maps.event.addListener(marker, 'dragend', function() {
+
+geocoder.geocode({'latLng': marker.getPosition()}, function(results, status) {
+if (status == google.maps.GeocoderStatus.OK) {
+if (results[0]) {
+$('#btn').hide();
+$('#latitude,#longitude').show();
+$('#address').val(results[0].formatted_address);
+$('#latitude').val(marker.getPosition().lat());
+$('#longitude').val(marker.getPosition().lng());
+}
+
+infowindow.setContent(results[0].formatted_address);
+var centralLatLng = marker.getPosition();
+search_types(centralLatLng);
+infowindow.open(map, marker);
+}
+});
+});
+} else {
+alert("No results found");
+}
+} else {
+alert("Geocoder failed due to: " + status);
+}
+});
+} 
+</script>
+
+
+</html>
